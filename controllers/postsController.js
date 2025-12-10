@@ -1,15 +1,27 @@
 const posts = require('../data/postsData');
 const connection = require('../database/db.js')
+
 //index
 function index(req, res) {
+    const sql = 'SELECT * FROM posts';
+    connection.query(sql, (err, results) => {
+        console.log(results);
+        if (err) return res.status(500).json({ error: true, message: err.message });
+        res.json(results);
+    })
 
-    const sql = 'SELECT * FROM connection'
-    res.send('I posts sono tutti');
 }
 //show
 function show(req, res) {
     const id = parseInt(req.params.id);
-    const post = posts.find(post => post.id === id);
+    const sql = 'SELECT * FROM posts WHERE id = ?'
+    connection.query(sql, [id], (err, results) => {
+        if (err) return res.status(500).json({ error: true, message: err.message });
+        if (results.length === 0) return res.status(404).json({ error: 'Post non trovato' })
+        console.log(err, results);
+        res.json(results[0]);
+    })
+    /* const post = posts.find(post => post.id === id);
     if (!post) {
         res.status(404);
         return res.json({
@@ -17,9 +29,9 @@ function show(req, res) {
             error: "Not Found",
             message: "Post non trovato"
         })
-    }
-    res.json(post);
+    } */
 }
+
 //store
 function store(req, res) {
     const newId = posts[posts.length - 1].id + 1;
@@ -64,20 +76,26 @@ function update(req, res) {
 //destroy
 function destroy(req, res) {
     const id = parseInt(req.params.id)
-    const post = posts.find(post => post.id === id);
-    if (!post) {
-        res.status(404);
-        return res.json({
-            status: 404,
-            error: "Not Found",
-            message: "Post non trovato"
-        })
-    }
+    const sql = 'DELETE FROM posts WHERE id = ?'
+    connection.query(sql, [id], (err, results) => {
+        if (err) return res.status(500).json({ error: true, message: err.message })
+        console.log(results);
+
+    })
+    res.send(`hai cancellato il post con id: ${id}`)
+    /*  const post = posts.find(post => post.id === id);
+     if (!post) {
+         res.status(404);
+         return res.json({
+             status: 404,
+             error: "Not Found",
+             message: "Post non trovato"
+         })
+     } 
     // Rimuoviamo il post dal menu
     posts.splice(posts.indexOf(post), 1);
     console.log(posts);
-    res.sendStatus(204);
-
+    res.sendStatus(204); */
 }
 
 
